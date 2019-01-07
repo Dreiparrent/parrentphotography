@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --source-map=true",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -20,8 +20,9 @@
     "@angular/platform-browser": "^6.1.0",
     "@angular/platform-browser-dynamic": "^6.1.0",
     "@angular/router": "^6.1.0",
+    "@types/gsap": "^1.19.2",
     "core-js": "^2.5.4",
-    "pixi.js": "^4.8.2",
+    "pixi.js": "^4.8.4",
     "rxjs": "^6.2.2",
     "zone.js": "~0.8.26"
   },

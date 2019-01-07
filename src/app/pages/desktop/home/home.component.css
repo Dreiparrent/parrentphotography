@@ -1,0 +1,40 @@
+.menu {
+    z-index: -1;
+    position: absolute;
+    background-color: #00FFFF;
+}
+#mainMenu {
+    background-color: transparent;
+    width: 0;
+    height: 0;
+    border-top: 50px solid transparent;
+    border-bottom: 50px solid transparent;
+    border-left: 100px solid #00FFFF;
+    top: 50vh;
+    transform: translateY(-50%);
+}
+#fansMenu {    
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    top: -180px;
+    left: -180px;
+}
+#scrollMenu {
+    width: 400px;
+    height: 400px;
+    right: 0;
+    top: 50vh;
+    transform: translate(50%, -50%);
+    border-radius: 50%;
+}
+/* 
+#unsureMenu {
+    width: 150px;
+    height: 150px;
+    top: 100vh;
+    transform: translateY(-100%);
+    border: solid 5px #000;
+    border-color: #00FFFF;
+    border-radius: 0 0 0 150px;
+} */

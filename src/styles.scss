@@ -1,7 +1,21 @@
 body {
   margin:0;
   padding:0;
-  overflow:hidden;
+  overflow: hidden;
+  background-image: url('assets/grid.png');
+  background-repeat: repeat;
+  background-size: cover;
+}
+html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+p, h1, h2, h3, h4, label {
+    font-family: 'Ludicrous';
+}
+h1 {
+    font-size: 34pt;
 }
 @font-face {
     font-family: 'Ludicrous';
