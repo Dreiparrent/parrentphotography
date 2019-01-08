@@ -3,9 +3,10 @@ import { CanvasService } from 'src/app/shared/services/canvas.service';
 import { Subscription, BehaviorSubject } from 'rxjs';
 import { DesktopPage } from 'src/app/shared/classes/page/desktop';
 import { ResizeService } from 'src/app/shared/services/resize.service';
-import { Container } from 'pixi.js';
 declare var TweenLite: typeof gsap.TweenLite;
 declare var Power2: typeof gsap.Power2;
+import * as PIXI from 'pixi.js';
+import 'pixi-projection';
 // declare var delay: typeof gsap.Tw;
 
 @Component({
@@ -19,7 +20,7 @@ export class DesignComponent extends DesktopPage implements OnInit, OnDestroy {
     private mousePosition: { x: number, y: number };
     private hoverSquare: PIXI.Sprite;
     private boxContainer: PIXI.Container;
-    private boxArray: PIXI.Container[] = [];
+    private boxArray: PIXI.projection.Sprite2d[] = [];
     private hovering = false;
     private hoverArea: PIXI.Sprite;
 
@@ -69,11 +70,14 @@ export class DesignComponent extends DesktopPage implements OnInit, OnDestroy {
         graphics.drawRect(0, 0, this.boxHeight, this.boxHeight);
         const texture = graphics.generateCanvasTexture();
 
+        const emptyGraphics = new PIXI.Graphics;
+        emptyGraphics.moveTo(0, 0);
+        emptyGraphics.drawRect(0, 0, this.boxHeight, this.boxHeight);
+        const empty = emptyGraphics.generateCanvasTexture();
         const shadowGraphics = new PIXI.Graphics;
         shadowGraphics.beginFill(0x000000, 0.7);
         shadowGraphics.drawRect(0, 0, this.boxHeight, this.boxHeight);
         shadowGraphics.endFill();
-
         const row1 = new PIXI.Container;
         const row2 = new PIXI.Container;
         const row3 = new PIXI.Container;
@@ -81,28 +85,27 @@ export class DesignComponent extends DesktopPage implements OnInit, OnDestroy {
         row2.position.y = this.boxHeight + 200;
         row3.position.y = 2 * this.boxHeight + 200;
         for (let i = 0; i < 6; i++) {
-            const box = new PIXI.Container();
-            const test = new Container();
+            const box = new PIXI.projection.Sprite2d(texture);
             const shadow = CanvasService.createShadow(shadowGraphics, this.boxHeight + 20, this.boxHeight + 20);
             shadow.position.set(20, 20);
             box.addChild(shadow);
-            const sprite = new PIXI.Sprite(texture);
+            const sprite = new PIXI.Sprite(empty);
             // sprite.on('mouseover', this.hover.bind(this, box));
             // sprite.on('mouseout', this.unhover.bind(this, box));
             sprite.interactive = true;
             box.addChild(sprite);
             switch (i) {
                 case 5:
-                    box.position.set(175, 0);
+                    box.position.set(0, 0);
                     row3.addChild(box);
                     break;
                 case 3:
                 case 4:
-                    box.position.set(this.boxHeight * (i - 3) + 175, 0);
+                    box.position.set(this.boxHeight * (i - 3) + 0, 0);
                     row2.addChild(box);
                     break;
                 default:
-                    box.position.set(this.boxHeight * i + 175, 0);
+                    box.position.set(this.boxHeight * i + 0, 0);
                     row1.addChild(box);
             }
             this.boxArray.push(box);
@@ -124,10 +127,46 @@ export class DesignComponent extends DesktopPage implements OnInit, OnDestroy {
         hoverGraphics.endFill();
         this.hoverArea = new PIXI.Sprite(hoverGraphics.generateCanvasTexture());
         this.hoverArea.position.x = 175;
+
+        function createSquare(x, y) {
+            const square = new PIXI.Sprite(PIXI.Texture.WHITE);
+            // square.tint = 0xff0000;
+            // square.factor = 1;
+            // square.anchor.set(0.5);
+            square.position.set(x, y);
+            return square;
+        }
+
+        const squares = [
+            createSquare(175, 0),
+            createSquare(375, 0),
+            createSquare(375, 200),
+            createSquare(175, 200)
+        ];
+        this.boxArray.forEach((b, i) => {
+            squares.push(createSquare(175 + this.boxHeight * i, this.boxHeight * i),
+                createSquare(375 + this.boxHeight * i, this.boxHeight * i),
+                createSquare(375 + this.boxHeight * i, 200 + this.boxHeight * i),
+                createSquare(175 + this.boxHeight * i, 200 + this.boxHeight * i)
+            );
+        });
+        squares.forEach(s => this._fgContainer.addChild(s));
+        const quad = squares.map(function (s) { return s.position; });
+        this.canvasService.app.ticker.add(() => {
+            this.boxArray.forEach(box => {
+                box.proj.mapSprite(box, quad);
+            });
+            // this.boxArray[0].proj.mapSprite(this.boxArray[0], quad);
+            // this.boxArray[0].proj.setAxisX(quad[2], 1);
+        });
         this.hoverArea.on('mouseover', () => {
-            this.boxArray[0].skew.set(0.1, 0.1);
-            this.boxArray[1].skew.set(-0.1, -0.1);
-            this.boxArray[3].skew.set(0.1, -0.1);
+            // this.boxArray[0].proj.mapSprite(this.boxArray[0], quad);
+            squares[2].y -= 30;
+            squares[2].x -= 30;
+            squares[0].y += 30;
+            squares[0].x += 30;
+            console.log(squares[3].y);
+            // const gr = new PIXI.Graphics;
         });
 
         this.hoverArea.on('mousedown', () => {
